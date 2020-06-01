@@ -21,7 +21,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 	ClientInfoRepository clientinfoRepository;
 	
 	@Override
-	public List<ClientInfoDTO> getAllInfo() {
+	public List<ClientInfoDTO> getAllClients() {
 		List<ClientInfo> clientinfos= clientinfoRepository.findAll();
 		List<ClientInfoDTO> clientinfoDTOs = new ArrayList<ClientInfoDTO>();
 		ClientInfoDTO clientinfoDTO = null;
@@ -29,10 +29,13 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 			clientinfoDTO = new ClientInfoDTO();
 			clientinfoDTO.setId(clientinfo.getId());
 			clientinfoDTO.setClient_code(clientinfo.getClient_code());
+//			clientinfoDTO.setProject_code(clientinfo.getProject_code());
 			clientinfoDTO.setClient_name(clientinfo.getClient_name());
 			clientinfoDTO.setClient_status(clientinfo.getClient_status());
-			clientinfoDTO.setCreated_by(clientinfo.getCreated_by());
-			clientinfoDTO.setModified_by(clientinfo.getModified_by());
+			clientinfoDTO.setClient_comments(clientinfo.getClient_comments());
+
+//			clientinfoDTO.setCreated_by(clientinfo.getCreated_by());
+//			clientinfoDTO.setModified_by(clientinfo.getModified_by());
 			clientinfoDTOs.add(clientinfoDTO);
 		}
 		return clientinfoDTOs;

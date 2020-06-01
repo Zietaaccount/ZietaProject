@@ -9,7 +9,7 @@ import com.zietaproj.zieta.model.ClientInfo;
 public interface ClientInfoService {
 
 	
-	public List<ClientInfoDTO> getAllInfo();
+	public List<ClientInfoDTO> getAllClients();
 
 	public void addClientInfo(ClientInfo clientinfo);
 }

@@ -15,7 +15,6 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -36,6 +35,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 	    @NotBlank
 	    private String client_code;
+	    
+	    @NotBlank
+	    private String client_comments;
 
 	    @NotBlank
 	    private String client_name;
@@ -132,6 +134,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 		public void setIS_DELETE(boolean iS_DELETE) {
 			IS_DELETE = iS_DELETE;
+		}
+
+		
+
+		public String getClient_comments() {
+			return client_comments;
+		}
+
+		public void setClient_comments(String client_comments) {
+			this.client_comments = client_comments;
+		}
+
+		public void setModified_by(String modified_by) {
+			this.modified_by = modified_by;
 		}
 		
 		
