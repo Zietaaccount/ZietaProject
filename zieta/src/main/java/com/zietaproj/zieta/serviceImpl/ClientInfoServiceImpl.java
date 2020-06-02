@@ -3,6 +3,7 @@ package com.zietaproj.zieta.serviceImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import com.zietaproj.zieta.dto.ClientInfoDTO;
 import com.zietaproj.zieta.model.ActivityMaster;
 import com.zietaproj.zieta.model.ClientInfo;
 import com.zietaproj.zieta.repository.ClientInfoRepository;
+import com.zietaproj.zieta.response.ActivitiesByTaskResponse;
 import com.zietaproj.zieta.service.ClientInfoService;
 
 @Service
@@ -20,19 +22,24 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 	@Autowired
 	ClientInfoRepository clientinfoRepository;
 	
+	@Autowired
+	ModelMapper modelMapper;
+	
 	@Override
 	public List<ClientInfoDTO> getAllClients() {
 		List<ClientInfo> clientinfos= clientinfoRepository.findAll();
 		List<ClientInfoDTO> clientinfoDTOs = new ArrayList<ClientInfoDTO>();
 		ClientInfoDTO clientinfoDTO = null;
 		for (ClientInfo clientinfo : clientinfos) {
-			clientinfoDTO = new ClientInfoDTO();
-			clientinfoDTO.setId(clientinfo.getId());
-			clientinfoDTO.setClient_code(clientinfo.getClient_code());
-//			clientinfoDTO.setProject_code(clientinfo.getProject_code());
-			clientinfoDTO.setClient_name(clientinfo.getClient_name());
-			clientinfoDTO.setClient_status(clientinfo.getClient_status());
-			clientinfoDTO.setClient_comments(clientinfo.getClient_comments());
+			clientinfoDTO = modelMapper.map(clientinfo, 
+					ClientInfoDTO.class);
+//			clientinfoDTO = new ClientInfoDTO();
+//			clientinfoDTO.setId(clientinfo.getId());
+//			clientinfoDTO.setClient_code(clientinfo.getClient_code());
+////			clientinfoDTO.setProject_code(clientinfo.getProject_code());
+//			clientinfoDTO.setClient_name(clientinfo.getClient_name());
+//			clientinfoDTO.setClient_status(clientinfo.getClient_status());
+//			clientinfoDTO.setClient_comments(clientinfo.getClient_comments());
 
 //			clientinfoDTO.setCreated_by(clientinfo.getCreated_by());
 //			clientinfoDTO.setModified_by(clientinfo.getModified_by());

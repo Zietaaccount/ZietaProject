@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 	    @NotBlank
 	    private String client_code;
 	    
-	    @NotBlank
+	    @NotBlank 
 	    private String client_comments;
 
 	    @NotBlank

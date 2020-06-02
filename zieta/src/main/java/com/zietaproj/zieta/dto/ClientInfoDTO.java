@@ -6,8 +6,8 @@ public class ClientInfoDTO {
 
 	private Long id;
     private String client_code;
-    private String client_comments;
     private String client_name;
+    private String client_comments;
     private Long client_status;
   //  private Date created_date;
   //  private String created_by;
