@@ -7,5 +7,5 @@ import com.zietaproj.zieta.model.ActivityMaster;
 
 @Repository
 public interface ActivityMasterRepository extends JpaRepository<ActivityMaster, Long>{
-
+//List<ActivityMaster> findById(Long project_id);
 }

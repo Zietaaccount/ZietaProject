@@ -8,5 +8,5 @@ import com.zietaproj.zieta.model.ActivitiesByTask;
 
 public interface ActivitiesByTaskRepo extends JpaRepository<ActivitiesByTask, Long> {
 
-	List<ActivitiesByTask> findByTaskId(long task_id);
+	List<ActivitiesByTask> findByTaskId(long taskId);
 }

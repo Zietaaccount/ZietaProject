@@ -9,6 +9,8 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.SecondaryTable;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -27,6 +29,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "TASK_ACTIVITY")
+@SecondaryTable(name="ACTIVITY_MASTER", pkJoinColumns = @PrimaryKeyJoinColumn(name="ID"))
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"created_date", "modified_date"}, 
         allowGetters = true)
@@ -40,17 +43,28 @@ public class ActivitiesByTask implements Serializable {
     private Long id;
 	
 	
+	@Column(name="client_id")
 	@NotNull
-    private Long client_id;
+    private Long clientId;
+	
+	@Column(name="project_id")
+	@NotNull
+    private Long projectId;
 	
 	@NotNull
-    private Long project_id;
-	
-	@NotNull
+	@Column(name="task_id")
     private Long taskId;
 	
 	@NotNull
     private Long activity_id;
+	
+	@NotBlank
+	@Column(name="activity_code", table = "activity_master")
+	private String activity_code;
+	
+	@NotBlank
+	@Column(name="activity_desc", table = "activity_master")
+	private String activity_desc;
 	
     @NotBlank
 	private String created_by;
@@ -78,20 +92,27 @@ public class ActivitiesByTask implements Serializable {
 		this.id = id;
 	}
 
-	public Long getClient_id() {
-		return client_id;
+	
+
+	
+	
+
+	
+
+	public Long getClientId() {
+		return clientId;
 	}
 
-	public void setClient_id(Long client_id) {
-		this.client_id = client_id;
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
 	}
 
-	public Long getProject_id() {
-		return project_id;
+	public Long getProjectId() {
+		return projectId;
 	}
 
-	public void setProject_id(Long project_id) {
-		this.project_id = project_id;
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
 	}
 
 	public Long getTaskId() {
@@ -102,7 +123,21 @@ public class ActivitiesByTask implements Serializable {
 		this.taskId = taskId;
 	}
 
-	
+	public String getActivity_code() {
+		return activity_code;
+	}
+
+	public void setActivity_code(String activity_code) {
+		this.activity_code = activity_code;
+	}
+
+	public String getActivity_desc() {
+		return activity_desc;
+	}
+
+	public void setActivity_desc(String activity_desc) {
+		this.activity_desc = activity_desc;
+	}
 
 	public Long getActivity_id() {
 		return activity_id;
