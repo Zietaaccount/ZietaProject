@@ -173,6 +173,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 						tsInfo.getClientId(),tsInfo.getProjectId(), tsInfo.getTaskId());
 				List<ProcessSteps> processStepFiltered = processStepsList.stream().filter(
 						step -> step.getStepId().equals(StateType.INITIAL.getStateTypeId())).collect(Collectors.toList());
+			 
 				String approverIds[] = null;
 				if(processStepFiltered.get(0).getApproverId() != null && !processStepFiltered.get(0).getApproverId().isEmpty()){
 					
@@ -185,6 +186,8 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 					statusTypesLoad  = Boolean.TRUE; 
 					
 				}
+				
+			
 				
 				if(approverIds == null) {
 
@@ -262,6 +265,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 					workFlowRequest.setComments(comments);
 					workFlowRequest.setApproverId(Long.valueOf(processStepFiltered.get(0).getApproverId()));
 					workFlowRequest.setStateType(StateType.INPROCESS.getStateTypeId());
+
 					// approved from the current step point of view
 					workFlowRequest.setActionType(ActionType.APPROVE.getActionType());
 					workFlowRequest.setActionDate(new Date());
