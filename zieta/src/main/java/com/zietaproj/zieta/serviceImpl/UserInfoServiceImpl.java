@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.zietaproj.zieta.dto.ProcessStepsDTO;
 import com.zietaproj.zieta.dto.UserInfoDTO;
 import com.zietaproj.zieta.model.ProcessSteps;
+import com.zietaproj.zieta.model.RoleMaster;
 import com.zietaproj.zieta.model.ScreensMaster;
 import com.zietaproj.zieta.model.UserAccessType;
 import com.zietaproj.zieta.model.UserInfo;
@@ -38,12 +39,15 @@ import com.zietaproj.zieta.service.UserInfoService;
 import com.zietaproj.zieta.util.PasswordUtil;
 
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 
 
 
 @Service
+@Slf4j
 public class UserInfoServiceImpl implements UserInfoService {
 
+	
 	@Autowired
 	UserInfoRepository userInfoRepositoryRepository;
 	
@@ -76,7 +80,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 	
 	@Override
 	public List<UserInfoDTO> getAllUserInfoDetails() {
-		List<UserInfo> userInfoList= userInfoRepositoryRepository.findAll();
+		short notDeleted = 0;
+		List<UserInfo> userInfoList= userInfoRepositoryRepository.findByIsDelete(notDeleted);
 		List<UserInfoDTO> userInfoDTOs = new ArrayList<UserInfoDTO>();
 		mapUserInfoModelToDTO(userInfoList, userInfoDTOs);
 		return userInfoDTOs;
@@ -86,7 +91,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		UserInfoDTO userInfoDTO = null;
 		for (UserInfo userInfo : userInfoList) {
 			userInfoDTO =  modelMapper.map(userInfo, UserInfoDTO.class);
-			userInfoDTO.setPassword("********");
+			userInfoDTO.setPassword("Welcome1");
 			userInfoDTO.setClientCode(clientInfoRepo.findById(userInfo.getClientId()).get().getClientCode());
 			userInfoDTO.setClientDescription(clientInfoRepo.findById(userInfo.getClientId()).get().getClientName());
 			 userInfoDTOs.add(userInfoDTO);
@@ -171,7 +176,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 
 	@Override
 	public List<UserInfoDTO> findByClientId(Long client_id) {
-		List<UserInfo> userInfoList = userInfoRepositoryRepository.findByClientId(client_id);
+		short notDeleted = 0;
+		List<UserInfo> userInfoList = userInfoRepositoryRepository.findByClientIdAndIsDelete(client_id, notDeleted);
 		List<UserInfoDTO> userInfoDTOs = new ArrayList<UserInfoDTO>();
 		mapUserInfoModelToDTO(userInfoList, userInfoDTOs);
 		return userInfoDTOs;
@@ -197,6 +203,26 @@ public class UserInfoServiceImpl implements UserInfoService {
 		}
 		
 	}
+	
+	public void deleteUsersById(Long id, String modifiedBy) throws Exception {
+	Optional<UserInfo> userinfo = userInfoRepositoryRepository.findById(id);
+	if (userinfo.isPresent()) {
+		UserInfo userinfoEntitiy = userinfo.get();
+		short delete = 1;
+		userinfoEntitiy.setIsDelete(delete);
+		userinfoEntitiy.setModifiedBy(modifiedBy);
+		userInfoRepositoryRepository.save(userinfoEntitiy);
+
+	}else {
+		log.info("No User Info found with the provided ID{} in the DB",id);
+		throw new Exception("No UserInfo found with the provided ID in the DB :"+id);
+	}
+	
+	
+}
+	
+	
+	
 	
 	@Override
 	public void EditPasswordByEmailId(@Valid PasswordEditRequest passwordeditRequest) throws Exception {

@@ -219,8 +219,6 @@ public class WorkFlowRequestServiceImpl implements WorkFlowRequestService {
 			workFlowRequest.setActionType(ActionType.REVISE.getActionType());
 			tsInfo.setStatusId((statusTypes.get(Status.DRAFT.getStatus())));
 			tsInfoRepository.save(tsInfo);
-			// Do we need to create the new Request or if its with the same request , need
-			// to start with Initial Step ?
 		}
 	}
 	
@@ -231,7 +229,7 @@ public class WorkFlowRequestServiceImpl implements WorkFlowRequestService {
 		short notDeleted = 0;
 		List<StatusMaster>  statusMasterList = statusMasterRepository.findByClientIdAndStatusTypeAndIsDelete(
 				tsInfo.getClientId(), TIMESHEET, notDeleted);
-		statusTypes = statusMasterList.stream().collect(Collectors.toMap(StatusMaster::getStatus, StatusMaster::getId));
+		statusTypes = statusMasterList.stream().collect(Collectors.toMap(StatusMaster::getStatusCode, StatusMaster::getId));
 		return statusTypes;
 	}
 	
