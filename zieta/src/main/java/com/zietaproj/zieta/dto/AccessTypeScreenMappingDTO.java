@@ -1,8 +1,11 @@
 package com.zietaproj.zieta.dto;
 
+import java.util.List;
+
 import javax.persistence.Column;
 
 import com.zietaproj.zieta.model.BaseEntity;
+import com.zietaproj.zieta.model.ScreensMaster;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +22,14 @@ public class AccessTypeScreenMappingDTO extends BaseEntity {
 	
 	//additional
 	
-	private String ClientDescription;
-	private String AccessTypeDescription;
-	private String ScreenDescription;
+
+	private String clientCode;
+	private String clientDescription;
+	private String accessTypeDescription;
+
+
+
+//	private String ScreenDescription;
+	
+	private List<ScreensMaster> screensByClient;
 }
