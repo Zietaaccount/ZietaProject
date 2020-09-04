@@ -108,9 +108,15 @@ public class WorkFlowRequestServiceImpl implements WorkFlowRequestService {
 	
 
 	@Override
-	public List<WFRDetailsForApprover> findByApproverId(long approverId) {
+	public List<WFRDetailsForApprover> findActiveWorkFlowRequestsByApproverId(long approverId) {
 		Long currentStepPointer = 1L;
 		List<WorkflowRequest> workFlowRequestList = workflowRequestRepository.findByApproverIdAndCurrentStep(approverId,currentStepPointer);
+		List<WFRDetailsForApprover> wFRDetailsForApproverList = getWorkFlowRequestDetails(workFlowRequestList);
+
+		return wFRDetailsForApproverList;
+	}
+
+	private List<WFRDetailsForApprover> getWorkFlowRequestDetails(List<WorkflowRequest> workFlowRequestList) {
 		List<WFRDetailsForApprover> wFRDetailsForApproverList = new ArrayList<WFRDetailsForApprover>();
 		WFRDetailsForApprover wFRDetailsForApprover = null;
 		for (WorkflowRequest workflowRequest : workFlowRequestList) {
@@ -143,7 +149,6 @@ public class WorkFlowRequestServiceImpl implements WorkFlowRequestService {
 			wFRDetailsForApproverList.add(wFRDetailsForApprover);
 
 		}
-
 		return wFRDetailsForApproverList;
 	}
 	
@@ -377,6 +382,13 @@ public class WorkFlowRequestServiceImpl implements WorkFlowRequestService {
 			workFlowHistoryModelList.add(workFlowHistoryModel);
 		}
 		return workFlowHistoryModelList;
+	}
+
+	@Override
+	public List<WFRDetailsForApprover> findWorkFlowRequestsByApproverId(long approverId) {
+		List<WorkflowRequest> workFlowRequestList = workflowRequestRepository.findByApproverId(approverId);
+		List<WFRDetailsForApprover> wFRDetailsForApproverList = getWorkFlowRequestDetails(workFlowRequestList);
+		return wFRDetailsForApproverList;
 	}
 
 }
