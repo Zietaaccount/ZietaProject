@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -14,13 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.zietaproj.zieta.common.TMSConstants;
 import com.zietaproj.zieta.model.ActivityMaster;
-import com.zietaproj.zieta.model.ProcessSteps;
 import com.zietaproj.zieta.model.TSInfo;
 import com.zietaproj.zieta.model.TSTimeEntries;
 import com.zietaproj.zieta.model.TaskInfo;
 import com.zietaproj.zieta.model.UserInfo;
 import com.zietaproj.zieta.model.WorkflowRequest;
-import com.zietaproj.zieta.model.WorkflowRequestHistory;
 import com.zietaproj.zieta.repository.ActivityMasterRepository;
 import com.zietaproj.zieta.repository.ClientInfoRepository;
 import com.zietaproj.zieta.repository.ProcessStepsRepository;
