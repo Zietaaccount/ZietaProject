@@ -150,7 +150,7 @@ public List<ProcessMasterDTO> getAllProcess() {
 				}
 				
 			}
-			String allApproverNames = String.join(" Or ", approverNames);
+			String allApproverNames = String.join(" or ", approverNames);
 			processStepDTO.setApproverName(allApproverNames);
 			processstepsDTOs.add(processStepDTO);
 		}
