@@ -73,6 +73,22 @@ public class StatusMasterController {
 		
 	}
 
+	@ApiOperation(value = "Deletes entries from status_master based on Id", notes = "Table reference: status_master")
+	@RequestMapping(value = "deleteStatusById", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public void deleteStatusById(@RequestParam(required=true) Long id, @RequestParam(required=true) String modifiedBy) throws Exception {
+		statusMasterService.deleteStatusById(id, modifiedBy);
+	}
 	
+	
+	@RequestMapping(value = "getStatusByClient", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "List Status based on the  clientId", notes = "Table reference: Status_master")
+	public ResponseEntity<List<StatusByClienttypeResponse>> getStatusByClient(@RequestParam(required = true) Long clientId) {
+		try {
+			List<StatusByClienttypeResponse> statusByClientStatustypeList = statusMasterService.findByClientId(clientId);
+			return new ResponseEntity<List<StatusByClienttypeResponse>>(statusByClientStatustypeList, HttpStatus.OK);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<List<StatusByClienttypeResponse>>(HttpStatus.NOT_FOUND);
+		}
+	}
 	
 }
