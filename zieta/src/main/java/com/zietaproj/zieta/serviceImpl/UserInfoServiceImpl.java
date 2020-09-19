@@ -91,7 +91,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
 	@Override
 	public UserInfoDTO findByEmail(String email) {
-		UserInfoDTO userInfoDTO = new UserInfoDTO();
+		UserInfoDTO userInfoDTO = null;
 		UserInfo userInfo = userInfoRepositoryRepository.findByEmail(email);
 		if(userInfo !=null) {
 			userInfoDTO =  modelMapper.map(userInfo, UserInfoDTO.class);
