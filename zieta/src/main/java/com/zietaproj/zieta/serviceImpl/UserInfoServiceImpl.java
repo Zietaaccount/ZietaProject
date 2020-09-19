@@ -158,6 +158,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 			active = ((dbUserInfo.getIsActive() != 0) && (clientStatus != 0));
 			if (password.equals(dbUserInfo.getPassword())) {
 				loginResponse.setIsSuperAdmin(clientInfo.getSuperAdmin());
+				loginResponse.setActive(active);
+				loginResponse.setLoginValid(active);
 				return loginResponse;
 
 			} else {
