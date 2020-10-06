@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -34,7 +36,6 @@ import com.zieta.tms.response.ActivitiesByClientResponse;
 import com.zieta.tms.response.ActivitiesByClientUserModel;
 import com.zieta.tms.service.ActivityService;
 import com.zieta.tms.util.TSMUtil;
-
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -118,15 +119,17 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public void addActivitiesByClientProjectTask(ActivityTaskUserMappingRequest activityTaskUserMappingRequest) {
-		
-			doUpSert(activityTaskUserMappingRequest);
-		
+	@Transactional
+	public void addActivitiesByClientProjectTask(@Valid List<ActivityTaskUserMappingRequest> activityTaskUserMappingRequest) {
+		for (ActivityTaskUserMappingRequest activityTaskUserMappingRequests : activityTaskUserMappingRequest)
+		{
+			doUpSert(activityTaskUserMappingRequests);
+		}
 	}
 
-	private void doUpSert(ActivityTaskUserMappingRequest activityTaskUserMappingRequest) {
-		
-		ActivityTaskUserMappingRequest.TaskActivity taskActivityReq = activityTaskUserMappingRequest.getTaskActivity();
+	private void doUpSert(ActivityTaskUserMappingRequest activityTaskUserMappingRequests) {
+	
+	ActivityTaskUserMappingRequest.TaskActivity taskActivityReq = activityTaskUserMappingRequests.getTaskActivity();
 		
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		TaskActivity taskActivityEntity = modelMapper.map(taskActivityReq, TaskActivity.class);
