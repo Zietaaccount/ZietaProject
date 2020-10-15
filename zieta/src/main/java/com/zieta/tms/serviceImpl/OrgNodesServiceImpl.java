@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.zieta.tms.dto.OrgInfoDTO;
+import com.zieta.tms.dto.OrgUnitTypeMasterDTO;
 import com.zieta.tms.model.OrgInfo;
 import com.zieta.tms.model.OrgUnitTypeMaster;
 import com.zieta.tms.model.TaskInfo;
+import com.zieta.tms.model.UserInfo;
 import com.zieta.tms.repository.ClientInfoRepository;
 import com.zieta.tms.repository.OrgInfoRepository;
 import com.zieta.tms.repository.OrgUnitTypeRepository;
+import com.zieta.tms.repository.UserInfoRepository;
 import com.zieta.tms.response.OrgNodesByClientResponse;
 import com.zieta.tms.response.TasksByClientProjectResponse;
 import com.zieta.tms.service.OrgNodesService;
@@ -48,6 +52,9 @@ public class OrgNodesServiceImpl implements OrgNodesService {
 	ClientInfoRepository clientInfoRepository;
 	
 	@Autowired
+	UserInfoRepository userInfoRepository;
+	
+	@Autowired
 	ModelMapper modelMapper;
 	
 	public List<OrgNodesByClientResponse> getOrgNodesByClient(Long clientId) {
@@ -62,6 +69,15 @@ public class OrgNodesServiceImpl implements OrgNodesService {
 			orgnodesByClientResponse.setClientCode(clientInfoRepository.findById(orgnodesByClient.getClientId()).get().getClientCode());
 			orgnodesByClientResponse.setClientDescription(clientInfoRepository.findById(orgnodesByClient.getClientId()).get().getClientName());
 			
+			orgnodesByClientResponse.setOrgManagerName(StringUtils.EMPTY);
+			if(null != orgnodesByClient.getOrgManager()) {
+				Optional <UserInfo> userInfo = userInfoRepository.findById(orgnodesByClient.getOrgManager());
+				if(userInfo.isPresent()) {
+					String userName = TSMUtil.getFullName(userInfo.get());
+					orgnodesByClientResponse.setOrgManagerName(userName);
+				}
+			}
+			
 			orgnodesByClientResponseList.add(orgnodesByClientResponse);
 		}
 		return orgnodesByClientResponseList;
@@ -75,15 +91,59 @@ public class OrgNodesServiceImpl implements OrgNodesService {
 		List<OrgInfoDTO> orginfoDTOs = new ArrayList<OrgInfoDTO>();
 		OrgInfoDTO orginfoDTO = null;
 		for (OrgInfo orgInfo : orginfos) {
+			//modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 			orginfoDTO = modelMapper.map(orgInfo, OrgInfoDTO.class);
 			orginfoDTO.setOrgUnitTypeDescription(orgunitTypeRepository.findById(orgInfo.getOrgType()).get().getTypeName());
 			orginfoDTO.setClientCode(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientCode());
 			orginfoDTO.setClientDescription(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientName());
 			orginfoDTO.setClientStatus(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientStatus());
 
+			orginfoDTO.setOrgManagerName(StringUtils.EMPTY);
+			if(null != orgInfo.getOrgManager()) {
+				Optional <UserInfo> userInfo = userInfoRepository.findById(orgInfo.getOrgManager());
+				if(userInfo.isPresent()) {
+					String userName = TSMUtil.getFullName(userInfo.get());
+					orginfoDTO.setOrgManagerName(userName);
+				}
+			}
+			
 			orginfoDTOs.add(orginfoDTO);
 		}
+		//List<OrgInfoDTO> treeList = TSMUtil.createTreeStructureHeirarchy(orginfoDTOs);
+	//	return treeList;
 		return orginfoDTOs;
+	}
+	
+	
+	
+	@Override
+	public List<OrgInfoDTO> getAllOrgNodesAsHeirarchy() {
+		short notDeleted=0;
+		List<OrgInfo> orginfos= orgInfoRepository.findByIsDelete(notDeleted);
+		List<OrgInfoDTO> orginfoDTOs = new ArrayList<OrgInfoDTO>();
+		OrgInfoDTO orginfoDTO = null;
+		for (OrgInfo orgInfo : orginfos) {
+			modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+			orginfoDTO = modelMapper.map(orgInfo, OrgInfoDTO.class);
+			orginfoDTO.setOrgUnitTypeDescription(orgunitTypeRepository.findById(orgInfo.getOrgType()).get().getTypeName());
+			orginfoDTO.setClientCode(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientCode());
+			orginfoDTO.setClientDescription(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientName());
+			orginfoDTO.setClientStatus(clientInfoRepository.findById(orgInfo.getClientId()).get().getClientStatus());
+
+			orginfoDTO.setOrgManagerName(StringUtils.EMPTY);
+			if(null != orgInfo.getOrgManager()) {
+				Optional <UserInfo> userInfo = userInfoRepository.findById(orgInfo.getOrgManager());
+				if(userInfo.isPresent()) {
+					String userName = TSMUtil.getFullName(userInfo.get());
+					orginfoDTO.setOrgManagerName(userName);
+				}
+			}
+			
+			orginfoDTOs.add(orginfoDTO);
+		}
+		List<OrgInfoDTO> treeList = TSMUtil.createTreeStructureHeirarchy(orginfoDTOs);
+		return treeList;
+	//	return orginfoDTOs;
 	}
 	
 	
@@ -153,6 +213,20 @@ public class OrgNodesServiceImpl implements OrgNodesService {
 			
 			orgnodesByClientResponseList.add(orgnodesByClientResponse);
 		}
+	}
+	
+	
+	public List<OrgUnitTypeMasterDTO> getAllOrgUnitTypeMaster() {
+		
+		short notDeleted=0;
+		List<OrgUnitTypeMaster> orgunitMasters= orgunitTypeRepository.findByIsDelete(notDeleted);
+		List<OrgUnitTypeMasterDTO> orgUnitMastersDTOs = new ArrayList<OrgUnitTypeMasterDTO>();
+		OrgUnitTypeMasterDTO orgUnitTypeMasterDTO = null;
+		for (OrgUnitTypeMaster orgs : orgunitMasters) {
+			orgUnitTypeMasterDTO = modelMapper.map(orgs, OrgUnitTypeMasterDTO.class);
+			orgUnitMastersDTOs.add(orgUnitTypeMasterDTO);
+		}
+		return orgUnitMastersDTOs;
 	}
 	
 }

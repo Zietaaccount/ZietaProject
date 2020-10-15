@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zieta.tms.dto.OrgInfoDTO;
+import com.zieta.tms.dto.OrgUnitTypeMasterDTO;
 import com.zieta.tms.model.OrgInfo;
+import com.zieta.tms.model.OrgUnitTypeMaster;
 import com.zieta.tms.response.OrgNodesByClientResponse;
 import com.zieta.tms.service.OrgNodesService;
 
@@ -44,7 +46,19 @@ public class OrgNodeController {
 		try {
 			orginfo = orgnodesService.getAllOrgNodes();
 		} catch (Exception e) {
-			LOGGER.error("Error Occured in StatusMasterController#getAllStatus",e);
+			LOGGER.error("Error Occured in OrgNodeController#getAllStatus",e);
+		}
+		return orginfo;
+	}
+	
+	
+	@RequestMapping(value = "getAllOrgNodesAsHeirarchy", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<OrgInfoDTO> getAllOrgNodesAsHeirarchy() {
+		List<OrgInfoDTO> orginfo = null;
+		try {
+			orginfo = orgnodesService.getAllOrgNodesAsHeirarchy();
+		} catch (Exception e) {
+			LOGGER.error("Error Occured in OrgNodesController#getAllStatus",e);
 		}
 		return orginfo;
 	}
@@ -92,6 +106,17 @@ public class OrgNodeController {
 		} catch (NoSuchElementException e) {
 			return new ResponseEntity<List<OrgNodesByClientResponse>>(HttpStatus.NOT_FOUND);
 		} 
+	}
+	
+	@RequestMapping(value = "getAllOrgUnitTypeMaster", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<OrgUnitTypeMasterDTO> getAllOrgUnitTypeMaster() {
+		List<OrgUnitTypeMasterDTO> orgunitmaster = null;
+		try {
+			orgunitmaster = orgnodesService.getAllOrgUnitTypeMaster();
+		} catch (Exception e) {
+			LOGGER.error("Error Occured in orgunitmasterController#getAllStatus",e);
+		}
+		return orgunitmaster;
 	}
 	
 }
