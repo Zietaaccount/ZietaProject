@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -27,7 +28,7 @@ import com.zieta.tms.service.AWSS3Service;
 		private static final Logger LOGGER = LoggerFactory.getLogger(AWSS3ServiceImpl.class);
 
 		@Autowired
-		private AmazonS3 amazonS3;
+		AmazonS3Client amazonS3Client;
 		@Value("${aws.s3.bucket}")
 		private String bucketName;
 
@@ -62,7 +63,7 @@ import com.zieta.tms.service.AWSS3Service;
 			final String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
 			LOGGER.info("Uploading file with name= " + uniqueFileName);
 			final PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
-			amazonS3.putObject(putObjectRequest);
+			amazonS3Client.putObject(putObjectRequest);
 		}
 
 		@Override
@@ -72,7 +73,7 @@ import com.zieta.tms.service.AWSS3Service;
 		public byte[] downloadFile(final String keyName) {
 			byte[] content = null;
 			LOGGER.info("Downloading an object with key= " + keyName);
-			final S3Object s3Object = amazonS3.getObject(bucketName, keyName);
+			final S3Object s3Object = amazonS3Client.getObject(bucketName, keyName);
 			final S3ObjectInputStream stream = s3Object.getObjectContent();
 			try {
 				content = IOUtils.toByteArray(stream);
