@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -26,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 	@Service
 	@Slf4j
 	public class AWSS3ServiceImpl implements AWSS3Service {
-
 
 		@Autowired
 		AmazonS3Client amazonS3Client;
@@ -57,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 			try (final FileOutputStream outputStream = new FileOutputStream(file)) {
 				outputStream.write(multipartFile.getBytes());
 			} catch (final IOException ex) {
+
 				log.error("Error converting the multi-part file to file= ", ex.getMessage());
 			}
 			return file;
@@ -93,11 +95,13 @@ import lombok.extern.slf4j.Slf4j;
 		@Async
 		public byte[] downloadFile(final String keyName) {
 			byte[] content = null;
+
 			log.info("Downloading an object with key= " + keyName);
 			final S3Object s3Object = amazonS3Client.getObject(bucketName, keyName);
 			final S3ObjectInputStream stream = s3Object.getObjectContent();
 			try {
 				content = IOUtils.toByteArray(stream);
+
 				log.info("File downloaded successfully.");
 				s3Object.close();
 			} catch(final IOException ex) {
