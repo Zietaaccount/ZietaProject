@@ -67,6 +67,7 @@ import lombok.extern.slf4j.Slf4j;
 		}
 
 		private String uploadFileToS3Bucket(final String bucketName, final File file,String objectKey) {
+
 			objectKey = objectKey + file.getName();
 			log.info("Uploading file with name= " + objectKey);
 			final PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, objectKey, file);

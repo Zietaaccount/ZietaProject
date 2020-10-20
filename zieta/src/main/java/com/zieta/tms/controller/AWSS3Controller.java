@@ -29,7 +29,6 @@ public class AWSS3Controller{
 
 	@PostMapping(value= "/s3/upload")
 	public ResponseEntity<String> uploadFile(@RequestPart(value= "multipartFile") MultipartFile multipartFile, @RequestParam String key) {
-		
 	
 		try {
 			String attachmentPath = service.uploadFile(multipartFile, key);
@@ -39,7 +38,6 @@ public class AWSS3Controller{
 		} 
 		catch (final AmazonServiceException ex) {
 			if (ex.getStatusCode() == HttpStatus.FORBIDDEN.value()) {
-
 				return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
 			}
 			log.info("File upload is failed.");
