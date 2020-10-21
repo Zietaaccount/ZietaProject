@@ -309,7 +309,7 @@ public class TSWorkFlowRequestServiceImpl implements WorkFlowRequestService {
 					// reduce the total rejected timeentries time from the total submitted time
 					float totalApprovedTime = tsInfo.getTsTotalSubmittedTime() - totalRejectTime;
 					tsInfo.setTsTotalApprovedTime(totalApprovedTime);
-					tsInfoRepository.save(tsInfo);
+					
 					
 //					activitiesTaskRepository
 				    Long taskActivityId = tsInfo.getTaskActivityId();
@@ -332,10 +332,12 @@ public class TSWorkFlowRequestServiceImpl implements WorkFlowRequestService {
 				    	 taskActivity.setCreatedDate(new Date());
 				    	 taskActivity.setModifiedDate(new Date());
 				    	 
-				    	 activitiesTaskRepository.save(taskActivity);
+				    	 taskActivity =  activitiesTaskRepository.save(taskActivity);
+				    	 tsInfo.setTaskActivityId(taskActivity.getTaskActivityId());
 				    	 
 				    }
 					
+				    tsInfoRepository.save(tsInfo);
 					
 					
 				}
