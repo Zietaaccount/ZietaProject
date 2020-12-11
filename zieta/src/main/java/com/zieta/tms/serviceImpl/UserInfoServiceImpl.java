@@ -127,6 +127,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		userDetailsResponse.setLastName(userInfo.getUserLname());
 		userDetailsResponse.setUserEmailId(userInfo.getEmail());
 		userDetailsResponse.setEmpId(userInfo.getEmpId());
+		userDetailsResponse.setOrgNode(userInfo.getOrgNode());
 		userDetailsResponse.setAccessTypeId(userInfo.getAccessTypeId());
 		userDetailsResponse.setStatus(userInfo.getIsActive());
 		userDetailsResponse.setUserId(userInfo.getId());
@@ -202,6 +203,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 			userinfosave.setUserLname(userinfoeditRequest.getUserLname());
 			userinfosave.setEmail(userinfoeditRequest.getEmail());
 			userinfosave.setEmpId(userinfoeditRequest.getEmpId());
+			userinfosave.setOrgNode(userinfoeditRequest.getOrgNode());
 			userinfosave.setAccessTypeId(userinfoeditRequest.getAccessTypeId());
 			userinfosave.setPhoneNo(userinfoeditRequest.getPhoneNo());
 			userinfosave.setIsActive(userinfoeditRequest.getIsActive());
