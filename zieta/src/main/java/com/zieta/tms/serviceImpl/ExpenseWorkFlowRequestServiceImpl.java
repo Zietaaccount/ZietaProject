@@ -259,15 +259,16 @@ public class ExpenseWorkFlowRequestServiceImpl implements ExpenseWorkFlowRequest
 	@Override
 	@Transactional
 	public void processExpenseWorkFlow(ExpenseWorkFlowRequestDTO expenseWorkFlowRequestDTO) throws Exception {
-		if(!expenseWorkFlowRequestDTO.getExpenseInfoDTO().isEmpty()) {
-			expenseService.editExpenseInfoByIds(expenseWorkFlowRequestDTO.getExpenseInfoDTO());
+		if(!expenseWorkFlowRequestDTO.getExpenseEntriesDTO().isEmpty()) {
+			expenseService.editExpenseEntriesById(expenseWorkFlowRequestDTO.getExpenseEntriesDTO());
 			log.info("Updated the expense entries");
 		}
 		processWorkFlow(expenseWorkFlowRequestDTO.getWorkflowRequestProcessModel());
 		
 	}
 
-	private List<ExpenseWorkFlowComment> getWFRCommentsChain(long expId) {
+	@Override
+	public List<ExpenseWorkFlowComment> getWFRCommentsChain(long expId) {
 
 		List<ExpenseWorkFlowComment> workFlowCommentList = new ArrayList<>();
 		ExpenseWorkFlowComment workFlowComment = null;

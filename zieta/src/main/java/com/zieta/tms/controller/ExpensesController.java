@@ -2,12 +2,14 @@ package com.zieta.tms.controller;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.lang.*;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,13 +56,29 @@ public class ExpensesController {
 
 	// filter based on client and userid
 
-	@GetMapping("/getAllExpensesByClientUser")
+//	@Bean
+	@GetMapping("/getAllExpensesHistoryByClientUser")
 	@ApiOperation(value = "List expenses based on the  clientId and userId", notes = "Table reference:"
+			+ "expense_info")
+	public ResponseEntity<List<ExpenseInfoDTO>> getAllExpensesHistoryByClientUser(@RequestParam(required = true) Long clientId,
+			@RequestParam(required = true) Long userId) {
+		try {
+			List<ExpenseInfoDTO> expensesList = expenseService.findByClientIdAndUserId(clientId, userId);
+			return new ResponseEntity<List<ExpenseInfoDTO>>(expensesList, HttpStatus.OK);
+		} catch (NoSuchElementException e) {
+			return new ResponseEntity<List<ExpenseInfoDTO>>(HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	//get only Draft State expenses 
+	
+	@GetMapping("/getAllExpensesByClientUser")
+	@ApiOperation(value = "List Draft expenses based on the  clientId and userId and StatusId", notes = "Table reference:"
 			+ "expense_info")
 	public ResponseEntity<List<ExpenseInfoDTO>> getAllExpensesByClientUser(@RequestParam(required = true) Long clientId,
 			@RequestParam(required = true) Long userId) {
 		try {
-			List<ExpenseInfoDTO> expensesList = expenseService.findByClientIdAndUserId(clientId, userId);
+			List<ExpenseInfoDTO> expensesList = expenseService.findActiveExpensesByClientIdAndUserId(clientId, userId);
 			return new ResponseEntity<List<ExpenseInfoDTO>>(expensesList, HttpStatus.OK);
 		} catch (NoSuchElementException e) {
 			return new ResponseEntity<List<ExpenseInfoDTO>>(HttpStatus.NOT_FOUND);

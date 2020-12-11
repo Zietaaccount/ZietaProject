@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -22,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Entity
-@Table(name = "user_info")
+@Table(name = "user_info", uniqueConstraints=@UniqueConstraint(columnNames= {"client_id", "emp_id"}))
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"created_date", "modified_date"}, 
         allowGetters = true)
@@ -47,7 +48,8 @@ public class UserInfo extends BaseEntity {
 	@Column(name = "user_lname")
 	private String userLname;
 	
-	@Column(name = "EMAIL_ID")
+	@NotBlank	
+	@Column(name = "EMAIL_ID", unique= true)
 	private String email;
 	
 	@Column(name = "EMP_ID")

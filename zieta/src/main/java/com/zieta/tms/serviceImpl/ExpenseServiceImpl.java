@@ -28,6 +28,7 @@ import com.zieta.tms.model.OrgInfo;
 import com.zieta.tms.model.ExpenseTypeMaster;
 import com.zieta.tms.model.ExpenseWorkflowRequest;
 import com.zieta.tms.model.ProjectInfo;
+import com.zieta.tms.model.StatusMaster;
 import com.zieta.tms.repository.CountryMasterRepository;
 import com.zieta.tms.repository.CurrencyMasterRepository;
 import com.zieta.tms.repository.ExpenseEntriesRepository;
@@ -38,6 +39,7 @@ import com.zieta.tms.repository.OrgInfoRepository;
 import com.zieta.tms.repository.ProjectInfoRepository;
 import com.zieta.tms.repository.StatusMasterRepository;
 import com.zieta.tms.request.UpdateTimesheetByIdRequest;
+import com.zieta.tms.response.ExpenseWFRDetailsForApprover;
 import com.zieta.tms.service.ExpenseService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +87,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 	@Qualifier("actionTypeByName")
 	Map<String, Long> actionTypeByName;
 	
+	//@Autowired
+	//@Qualifier("statusIdByCode")
+	//Map<String, Long> statusIdByCode;
 
 	@Override
 	public List<ExpenseInfoDTO> getAllExpenses() {
@@ -94,14 +99,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 		ExpenseInfoDTO expenseInfoDTO = null;
 		for (ExpenseInfo expenseInfo : expenseInfos) {
 			expenseInfoDTO = modelMapper.map(expenseInfo, ExpenseInfoDTO.class);
-			expenseInfoDTO.setOrgUnitCode(StringUtils.EMPTY);
-			if (null != expenseInfo.getOrgUnitId()) {
-			Optional<OrgInfo>  orgInfo = orgInfoRepository.findById(expenseInfo.getOrgUnitId());
-			if (orgInfo.isPresent()) {
-				expenseInfoDTO.setOrgUnitCode(orgInfo.get().getOrgNodeCode());
-
-			}
-		}
+//			expenseInfoDTO.setOrgUnitCode(StringUtils.EMPTY);
+//			if (null != expenseInfo.getOrgUnitId()) {
+//			Optional<OrgInfo>  orgInfo = orgInfoRepository.findById(expenseInfo.getOrgUnitId());
+//			if (orgInfo.isPresent()) {
+//			//	expenseInfoDTO.setOrgUnitCode(orgInfo.get().getOrgNodeCode());
+//
+//			}
+//		}
 			
 			expenseInfoDTO.setOrgUnitDesc(StringUtils.EMPTY);
 			if (null != expenseInfo.getOrgUnitId()) {
@@ -124,17 +129,24 @@ public class ExpenseServiceImpl implements ExpenseService {
 			List<ExpenseInfoDTO> expenseInfoList = new ArrayList<>();
 			List<ExpenseInfo> expenseInfos = expenseInfoRepository.findByClientIdAndUserIdAndIsDelete(clientId, userId, notDeleted);
 			ExpenseInfoDTO expenseInfoDTO = null;
+			
+//			List<StatusMaster> statusId =  statusMasterRepository
+//					.findByClientIdAndStatusTypeAndStatusCodeNotAndIsDelete(clientId,
+//							TMSConstants.EXPENSE, TMSConstants.EXPENSE_DRAFT, (short) 0);
+//		//	System.out.println(+statusId);
+//			List<ExpenseInfo> expenseInfos  = expenseInfoRepository.findByClientIdAndUserIdAndStatusIdInAndIsDelete(clientId, userId, statusId, notDeleted);
+//			
 			for (ExpenseInfo expenses : expenseInfos) {
 				expenseInfoDTO = modelMapper.map(expenses, ExpenseInfoDTO.class);
 				
-				expenseInfoDTO.setProjectCode(StringUtils.EMPTY);
-				if (null != expenses.getProjectId()) {
-				Optional<ProjectInfo> projectInfo  = projectInfoRepository.findById(expenses.getProjectId());
-				if (projectInfo.isPresent()) {
-					expenseInfoDTO.setProjectCode(projectInfo.get().getProjectCode());
-
-				}
-			}
+//				expenseInfoDTO.setProjectCode(StringUtils.EMPTY);
+//				if (null != expenses.getProjectId()) {
+//				Optional<ProjectInfo> projectInfo  = projectInfoRepository.findById(expenses.getProjectId());
+//				if (projectInfo.isPresent()) {
+//					expenseInfoDTO.setProjectCode(projectInfo.get().getProjectCode());
+//
+//				}
+//			}
 				
 				expenseInfoDTO.setProjectDesc(StringUtils.EMPTY);
 				if (null != expenses.getProjectId()) {
@@ -145,14 +157,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 				}
 			}
 				
-				expenseInfoDTO.setOrgUnitCode(StringUtils.EMPTY);
-				if (null != expenses.getOrgUnitId()) {
-				Optional<OrgInfo>  orgInfo = orgInfoRepository.findById(expenses.getOrgUnitId());
-				if (orgInfo.isPresent()) {
-					expenseInfoDTO.setOrgUnitCode(orgInfo.get().getOrgNodeCode());
-
-				}
-			}
+//				expenseInfoDTO.setOrgUnitCode(StringUtils.EMPTY);
+//				if (null != expenses.getOrgUnitId()) {
+//				Optional<OrgInfo>  orgInfo = orgInfoRepository.findById(expenses.getOrgUnitId());
+//				if (orgInfo.isPresent()) {
+//					expenseInfoDTO.setOrgUnitCode(orgInfo.get().getOrgNodeCode());
+//
+//				}
+//			}
 				
 				expenseInfoDTO.setOrgUnitDesc(StringUtils.EMPTY);
 				if (null != expenses.getOrgUnitId()) {
@@ -168,6 +180,88 @@ public class ExpenseServiceImpl implements ExpenseService {
 			return expenseInfoList;
 	}
 
+	
+	//draft Expenses
+	
+	
+//	@Override
+//	public List<ExpenseInfoDTO> findActiveExpensesByClientIdAndUserId(Long clientId, Long userId) {
+//		
+//		List<Long> actionTypes = new ArrayList<Long>();
+//		actionTypes.add(actionTypeByName.get(TMSConstants.EXPENSE_SUBMITTED));
+//		actionTypes.add(actionTypeByName.get(TMSConstants.EXPENSE_APPROVED));
+//		actionTypes.add(actionTypeByName.get(TMSConstants.EXPENSE_REJECTED));
+//
+//		
+//		List<ExpenseInfo> expenseRequestList = expenseInfoRepository
+//				.findByClientIdAndUserIdAndActionTypeNotIn(clientId, userId, actionTypes);
+//		return getActiveExpensesDetails(expenseRequestList);
+//	}
+//	
+	
+	@Override
+	@Transactional
+	public List<ExpenseInfoDTO> findActiveExpensesByClientIdAndUserId(Long clientId, Long userId) {
+		
+		 short notDeleted=0;
+			List<ExpenseInfoDTO> expenseInfoList = new ArrayList<>();
+			ExpenseInfoDTO expenseInfoDTO = null;
+				
+				long statusId = statusMasterRepository
+							.findByClientIdAndStatusTypeAndStatusCodeAndIsDelete(clientId,
+									TMSConstants.EXPENSE, TMSConstants.EXPENSE_DRAFT, (short) 0)
+							.getId();
+					List<ExpenseInfo> expInfo  = expenseInfoRepository.findByClientIdAndUserIdAndStatusIdAndIsDelete(clientId, userId, statusId, notDeleted);
+					for (ExpenseInfo expensess : expInfo) {
+					expenseInfoDTO = modelMapper.map(expensess, ExpenseInfoDTO.class);
+						expenseInfoDTO.setStatusId(expensess.getStatusId());
+
+//				expenseInfoDTO.setProjectCode(StringUtils.EMPTY);
+//				if (null != expensess.getProjectId()) {
+//				Optional<ProjectInfo> projectInfo  = projectInfoRepository.findById(expensess.getProjectId());
+//				if (projectInfo.isPresent()) {
+//					expenseInfoDTO.setProjectCode(projectInfo.get().getProjectCode());
+//
+//				}
+//			}
+				
+				expenseInfoDTO.setProjectDesc(StringUtils.EMPTY);
+				if (null != expensess.getProjectId()) {
+				Optional<ProjectInfo> projectInfo  = projectInfoRepository.findById(expensess.getProjectId());
+				if (projectInfo.isPresent()) {
+					expenseInfoDTO.setProjectDesc(projectInfo.get().getProjectName());
+
+				}
+			}
+				
+//				expenseInfoDTO.setOrgUnitCode(StringUtils.EMPTY);
+//				if (null != expensess.getOrgUnitId()) {
+//				Optional<OrgInfo>  orgInfo = orgInfoRepository.findById(expensess.getOrgUnitId());
+//				if (orgInfo.isPresent()) {
+//					expenseInfoDTO.setOrgUnitCode(orgInfo.get().getOrgNodeCode());
+//
+//				}
+//			}
+				
+				expenseInfoDTO.setOrgUnitDesc(StringUtils.EMPTY);
+				if (null != expensess.getOrgUnitId()) {
+				Optional<OrgInfo> orgInfo  = orgInfoRepository.findById(expensess.getOrgUnitId());
+				if (orgInfo.isPresent()) {
+					expenseInfoDTO.setOrgUnitDesc(orgInfo.get().getOrgNodeName());
+
+				}
+			}
+				
+					
+				expenseInfoList.add(expenseInfoDTO);
+			}
+			return expenseInfoList;
+	}
+
+	
+	
+	
+	
 	@Override
 	public List<ExpenseMasterDTO> getAllExpenseMasters() {
 		short notDeleted = 0;

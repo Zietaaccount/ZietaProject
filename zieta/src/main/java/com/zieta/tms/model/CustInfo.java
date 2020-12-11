@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -50,8 +51,9 @@ import lombok.Data;
 	    @Column(name = "cust_details")
 	    private String custDetails;
 	    
-	    @Column(name = "cust_code")
-	    private String custCode;
+	  //  @NotBlank
+	//    @Column(name = "cust_code")
+	 //   private String custCode;
 	    
 	   
 

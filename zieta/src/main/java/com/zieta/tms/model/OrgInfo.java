@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -39,8 +40,9 @@ public class OrgInfo extends BaseEntity implements Serializable {
 	    @Column(name="client_id")
 	    private Long clientId;
 	
-	    @Column(name="org_node_code")
-	    private String orgNodeCode;
+	 //   @NotBlank
+	//    @Column(name="org_node_code")
+	 //   private String orgNodeCode;
 	  
 	    @Column(name="org_node_name")
 	    private String orgNodeName;

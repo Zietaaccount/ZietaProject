@@ -9,6 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -26,14 +29,16 @@ public class TaskInfo extends BaseEntity implements Serializable {
 	    @Column(name = "client_id")
 	    private Long clientId;
 	
+	    @NotNull
 	    @Column(name = "project_id")
 	    private Long projectId;
 	    
 	    @Column(name = "task_name")
 	    private String taskDescription;
 	    
-	    @Column(name ="task_code")
-	    private String taskCode;
+	  //  @NotBlank
+	//    @Column(name ="task_code")
+	 //   private String taskCode;
 	    
 	    @Column(name = "task_type")
 	    private Long taskType;
