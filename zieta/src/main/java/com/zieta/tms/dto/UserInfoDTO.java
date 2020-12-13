@@ -33,6 +33,7 @@ public class UserInfoDTO {
 	private String clientDescription;
 	private Long clientStatus;
 	private String accessType;
+	private String orgNodeName;
 
 	
 
