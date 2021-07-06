@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hpsf.Decimal;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,7 @@ import com.zieta.tms.dto.ExpenseInfoDTO;
 import com.zieta.tms.dto.ExpenseMasterDTO;
 import com.zieta.tms.model.CountryMaster;
 import com.zieta.tms.model.CurrencyMaster;
+import com.zieta.tms.model.ExpTemplateSteps;
 import com.zieta.tms.model.ExpenseEntries;
 import com.zieta.tms.model.ExpenseInfo;
 import com.zieta.tms.model.ExpenseTypeMaster;
@@ -31,8 +33,10 @@ import com.zieta.tms.model.OrgInfo;
 import com.zieta.tms.model.ProjectInfo;
 import com.zieta.tms.model.StatusMaster;
 import com.zieta.tms.model.UserInfo;
+import com.zieta.tms.model.WorkflowRequest;
 import com.zieta.tms.repository.CountryMasterRepository;
 import com.zieta.tms.repository.CurrencyMasterRepository;
+import com.zieta.tms.repository.ExpTemplateStepsRepository;
 import com.zieta.tms.repository.ExpenseEntriesRepository;
 import com.zieta.tms.repository.ExpenseInfoRepository;
 import com.zieta.tms.repository.ExpenseTypeMasterRepository;
@@ -45,6 +49,7 @@ import com.zieta.tms.service.ExpenseService;
 import com.zieta.tms.util.TSMUtil;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.build.Plugin.Engine.Source.Empty;
 
 @Service
 @Transactional
@@ -80,6 +85,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 	@Autowired
 	StatusMasterRepository statusMasterRepository;
+	
+	@Autowired
+	ExpTemplateStepsRepository expTemplateStepsRepository;
 
 	@Autowired
 	ModelMapper modelMapper;
@@ -407,8 +415,18 @@ public class ExpenseServiceImpl implements ExpenseService {
 	@Override
 	public List<ExpenseInfo> addExpenseInfo(List<ExpenseInfo> expenseInfo) throws Exception {
 
-		List<ExpenseInfo> expenseInfoList = expenseInfoRepository.saveAll(expenseInfo);
-//		 submitExpenses(expenseInfoList);
+		//List<ExpenseInfo> expenseInfoList = expenseInfoRepository.saveAll(expenseInfo); //prev concept		
+		// BEING TO RESOLVE ORGUINTID ISSUE WITH ZERO VALUE
+		List<ExpenseInfo> expenseInfoLst = new ArrayList<ExpenseInfo>();
+		for(ExpenseInfo expenseInfoData:expenseInfo) {
+			if(expenseInfoData.getOrgUnitId()!=null && expenseInfoData.getOrgUnitId()==0) {
+				expenseInfoData.setOrgUnitId(null);
+			}
+			expenseInfoLst.add(expenseInfoData);			
+		}
+		//END IMPL
+		// submitExpenses(expenseInfoList);
+		List<ExpenseInfo> expenseInfoList = expenseInfoRepository.saveAll(expenseInfoLst);
 		return expenseInfoList;
 	}
 
@@ -467,47 +485,121 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 	@Override
 	public boolean submitExpenses(List<ExpenseInfo> expenseInfoList) throws Exception {
-
+		
 		List<ExpenseWorkflowRequest> expenseWorkflowRequestList = new ArrayList<>();
 		try {
+			ExpenseWorkflowRequest expenseWorkflowRequest = null;
 			for (ExpenseInfo expenseInfo : expenseInfoList) {
-
-				ExpenseWorkflowRequest expenseWorkflowRequest = expenseWorkflowRepository
-						.findByExpId(expenseInfo.getId());
+				
+				if(expenseInfo.getOrgUnitId()!=null && expenseInfo.getOrgUnitId()==0) {
+					expenseInfo.setOrgUnitId(null);
+				}
+				
+				/*
+				 * ExpenseWorkflowRequest expenseWorkflowRequest = expenseWorkflowRepository
+				 * .findByExpId(expenseInfo.getId());
+				 */				
+				expenseWorkflowRequestList = expenseWorkflowRepository
+						.findByExpIdOrderByStepId(expenseInfo.getId());					
 				ExpenseInfo expenseInfoEntitiy = expenseInfoRepository.findById(expenseInfo.getId()).get();
-			//	expenseInfoEntitiy.setExpPostingDate(new Date());
-
+				expenseInfoEntitiy.setExpPostingDate(new Date());
+				 
 				Long statusId = statusMasterRepository
 						.findByClientIdAndStatusTypeAndStatusCodeAndIsDelete(expenseInfo.getClientId(),
-								TMSConstants.EXPENSE, TMSConstants.EXPENSE_SUBMITTED, (short) 0)
-						.getId();
+								TMSConstants.EXPENSE, TMSConstants.EXPENSE_SUBMITTED, (short) 0).getId();
+				
 				expenseInfo.setStatusId(statusId);
 				expenseInfo.setExpPostingDate(new Date());
-
-				if (expenseWorkflowRequest == null) {
-					log.info("Creating new expense WFR objects...");
-					expenseWorkflowRequest = new ExpenseWorkflowRequest();
+				expenseInfoRepository.save(expenseInfo);
+				
+				///IMPLEMENTATION FOR MULTI LEVEL APPROVALBEING
+				UserInfo userInfo = userInfoRepository.findByUserId(expenseInfo.getUserId());						
+				List<ExpTemplateSteps>  expTemplateStepsList = null;
+				if(userInfo.getExpTemplateId()!=null) {
+					expTemplateStepsList = expTemplateStepsRepository.findByTemplateIdOrderByStepId(userInfo.getExpTemplateId());
+				}
+					
+				///PREV BEING
+				if (expenseWorkflowRequestList.isEmpty()) {
+					log.info("Creating new expense WFR objects...");					
+					//BEING ITERATION FOR  EXPtEMPLATESTEPSREPOSITORY					
+					expenseWorkflowRequest = new ExpenseWorkflowRequest();					
 					expenseWorkflowRequest.setClientId(expenseInfo.getClientId());
 					expenseWorkflowRequest.setProjectId(expenseInfo.getProjectId());
 					expenseWorkflowRequest.setOrgUnitId(expenseInfo.getOrgUnitId());
 					expenseWorkflowRequest.setExpId(expenseInfo.getId());
 					expenseWorkflowRequest.setRequestorId(expenseInfo.getUserId());
 					expenseWorkflowRequest.setRequestDate(new Date());
-					long approverId = getApproverId(expenseInfo);
-					expenseWorkflowRequest.setApproverId(approverId);
+					long approverId = getApproverId(expenseInfo);//projectManagerId
+					
+					if(approverId == expenseInfo.getUserId()) {
+						expenseWorkflowRequest.setApproverId(userInfo.getReportingMgr());
+					}else {
+						expenseWorkflowRequest.setApproverId(approverId);
+					}
 					expenseWorkflowRequest.setStateType(stateByName.get(TMSConstants.STATE_START));
 					expenseWorkflowRequest.setActionType(actionTypeByName.get(TMSConstants.ACTION_NULL));
+					
+					
+					//SET STEPID AND CURRENT STEP
+					expenseWorkflowRequest.setStepId(1L);
+					expenseWorkflowRequest.setCurrentStep(1L);					
 					expenseWorkflowRequestList.add(expenseWorkflowRequest);
+					
+					///IMPLEMENT FOR MULTILEVEL APPROVAL
+					for(ExpTemplateSteps expTemplateStep:expTemplateStepsList) {
+						
+						float chkAmt = expTemplateStep.getCheckAmt();
+						float expAmt = expenseInfo.getExpAmount();
+						Double approvalAmt = expTemplateStep.getApproverAmount();						
+						expenseWorkflowRequest = new ExpenseWorkflowRequest();					
+						expenseWorkflowRequest.setClientId(expenseInfo.getClientId());
+						expenseWorkflowRequest.setProjectId(expenseInfo.getProjectId());
+						//to set cost center id
+						expenseWorkflowRequest.setOrgUnitId(expenseInfo.getOrgUnitId());
+						expenseWorkflowRequest.setExpId(expenseInfo.getId());
+						expenseWorkflowRequest.setRequestorId(expenseInfo.getUserId());
+						expenseWorkflowRequest.setRequestDate(new Date());						
+						expenseWorkflowRequest.setStepId(expTemplateStep.getStepId()+1);
+						expenseWorkflowRequest.setCurrentStep(0L);						
+						expenseWorkflowRequest.setStateType(stateByName.get(TMSConstants.STATE_OPEN));
+						///IN CASE REQUESTER  AND APPROVER IS SAME PERSON
+						if(expTemplateStep.getApproverId() == expenseInfo.getUserId()) {
+							expenseWorkflowRequest.setApproverId(userInfo.getReportingMgr());
+						}else {
+							expenseWorkflowRequest.setApproverId(expTemplateStep.getApproverId());
+						}						
+						expenseWorkflowRequestList.add(expenseWorkflowRequest);							
+						if((chkAmt ==1 || chkAmt ==1.0) &&( (approvalAmt!=null && (expAmt <= approvalAmt)) || approvalAmt ==null) ) {
+							///STOP MULTILEVEL APPROVAL  IN CASE EXP AMOUNT IS LESSER THEN APPROVER'S APPROVAL AMOUNT
+							break;
+						}
+												
+					}					
+					///END ITERATION		
+					
 				} else {
-					// existing records came for revision
+					/// existing records came for revision					
 					log.info("Existing wfrequests came for revision..");
-					expenseWorkflowRequest.setStateType(stateByName.get(TMSConstants.STATE_START));
-					expenseWorkflowRequest.setActionType(actionTypeByName.get(TMSConstants.ACTION_NULL));
+					/*for(ExpTemplateSteps expTemplateStep:expTemplateStepsList) {
+						expenseWorkflowRequest.setStateType(stateByName.get(TMSConstants.STATE_START));
+						expenseWorkflowRequest.setActionType(actionTypeByName.get(TMSConstants.ACTION_NULL));
+					}*/		
+					
+					for(ExpenseWorkflowRequest oldWorkflowRequest: expenseWorkflowRequestList ) {
+						
+						oldWorkflowRequest.setActionType(actionTypeByName.get(TMSConstants.ACTION_NULL));
+						oldWorkflowRequest.setRequestDate(new Date());
+						oldWorkflowRequest.setActionDate(null);
+					}		
+					
 				}
+				///PREV END					
+				///IMPLEMENTATION END				
 				expenseInfoRepository.save(expenseInfo);
 
 			}
-
+			
 			expenseWorkflowRepository.saveAll(expenseWorkflowRequestList);
 
 			log.info("Expense WFRequests are submited...");
@@ -521,9 +613,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 	}
 
 	private long getApproverId(ExpenseInfo expenseInfo) {
-
 		Long approverId = 0L;
-
 		try {
 			if (expenseInfo.getProjectId() != null && expenseInfo.getProjectId() != 0) {
 				approverId = projectInfoRepository.findById(expenseInfo.getProjectId()).get().getProjectManager();

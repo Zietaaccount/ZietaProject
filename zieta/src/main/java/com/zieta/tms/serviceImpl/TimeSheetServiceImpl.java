@@ -116,20 +116,29 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 	@Override
 	public List<TSInfoModel> getTimeEntriesByUserDates(Long clientId, Long userId, Date startDate, Date endDate) {
 		short notDeleted=0;
-		List<TSInfoModel> tsInfoModelList = new ArrayList<TSInfoModel>();
+		List<TSInfoModel> tsInfoModelList = new ArrayList<TSInfoModel>();		
 		
-		DateRange dateRange = TSMUtil.getFilledDateRange(startDate, endDate, false);
+		DateRange dateRange = TSMUtil.getFilledDateRange(startDate, endDate, false);		
+		
 		List<TSInfo> tsInfoList = tSInfoRepository.findByClientIdAndUserIdAndIsDeleteAndTsDateBetweenOrderByTaskActivityIdAscIdAsc(clientId, 
-				userId, notDeleted, dateRange.getStartDate(), dateRange.getEndDate());
+				userId, notDeleted, dateRange.getStartDate(), dateRange.getEndDate());		
+		
 		for (TSInfo tsInfo : tsInfoList) {
 			
 			TSInfoDTO tsInfoDTO = new TSInfoDTO();
 			//for (TSInfo tsInfo : tsInfoList) {
 			boolean isProjectTaskActivityDeleted = false;
-			TSInfoModel taskInfoModel = new TSInfoModel();	
+			TSInfoModel taskInfoModel = new TSInfoModel();
 			
+			String strDate = null;	
+			String sbmtDate = null;
 			//NEW IMPLEMENTION TO SET DIFFERENT DATE TYPE
-			String strDate = new SimpleDateFormat("yyyy-MM-dd").format(tsInfo.getTsDate());			
+			if(tsInfo.getTsDate()!=null)
+				strDate = new SimpleDateFormat("yyyy-MM-dd").format(tsInfo.getTsDate());	
+			 
+			 if(tsInfo.getSubmitDate()!=null)
+				 sbmtDate = new SimpleDateFormat("yyyy-MM-dd").format(tsInfo.getSubmitDate());			
+			
 			tsInfoDTO.setCreatedBy(tsInfo.getCreatedBy());
 			tsInfoDTO.setModifiedBy(tsInfo.getModifiedBy());
 			tsInfoDTO.setIsDelete(tsInfo.getIsDelete());
@@ -143,7 +152,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			tsInfoDTO.setStatusId(tsInfo.getStatusId());
 			tsInfoDTO.setPlannedActivity(tsInfo.isPlannedActivity());
 			tsInfoDTO.setTsDate(strDate);//Change the format
-			tsInfoDTO.setSubmitDate(tsInfo.getSubmitDate());
+			tsInfoDTO.setSubmitDate(sbmtDate);
 			if(tsInfo.getTsTotalSubmittedTime()!=null)
 				tsInfoDTO.setTsTotalSubmittedTime(tsInfo.getTsTotalSubmittedTime());
 			
@@ -158,8 +167,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 			for (TSTimeEntries timetp : timeEntries) {
 				taskInfoModel.setTimeTypeDesc(timeTypeRepository.findById(timetp.getTimeType()).get().getTimeType());
 			}
-			taskInfoModel.setTimeEntries(timeEntries);
-			
+			taskInfoModel.setTimeEntries(timeEntries);			
 			
 			if(tsInfo.getActivityId() != null && tsInfo.getActivityId() !=0) {
 				ActivityMaster activityEntity = activityMasterRepository.findById(tsInfo.getActivityId()).get();
@@ -176,7 +184,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 				taskInfoModel.setProjectDescription(projectEntity.getProjectName());
 				taskInfoModel.setIsDeleteProject(projectEntity.getIsDelete());
 			}else {
-			taskInfoModel.setProjectDescription(StringUtils.EMPTY);
+				taskInfoModel.setProjectDescription(StringUtils.EMPTY);
 			}
 			
 			if(tsInfo.getTaskId() !=null && tsInfo.getTaskId() !=0) {
@@ -368,7 +376,6 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 
 		return timeentriesBytsIdResponseList;
 		
-		
 	}
 	
 	@Override
@@ -393,8 +400,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		else {
 			throw new Exception("Timesheet not found with the provided ID : " + updatetimesheetRequest.getId());
 		}
-	}
-	
+	}	
 	
 	@Override
 	@Transactional
@@ -403,9 +409,7 @@ public class TimeSheetServiceImpl implements TimeSheetService {
 		for (UpdateTimesheetByIdRequest updateRequest : updatetimesheetRequest) {
 			updateTimeSheetById(updateRequest);
 		}
-	}
-	
-	
+	}	
 	
 	public List<WorkflowDTO> getAllWorkflowDetails() {
 

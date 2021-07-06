@@ -31,6 +31,9 @@ public class UserInfo extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@Column(name = "exp_template_id")
+	private Long expTemplateId;
+	
 	@Column(name = "client_id")
 	private Long clientId;
 	
@@ -70,5 +73,14 @@ public class UserInfo extends BaseEntity {
 	
 	@Column(nullable = false)
 	private String password;
+
+	@Column(name = "TS_OPEN")
+	private Short isTsOpen =0;
+	
+	@Column(name = "EXP_OPEN")
+	private Short isExpOpen =0;
+	
+	@Column(name = "EXT_ID")
+	private String extId;
 
 }

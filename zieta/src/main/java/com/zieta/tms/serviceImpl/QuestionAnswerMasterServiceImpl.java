@@ -74,6 +74,19 @@ public class QuestionAnswerMasterServiceImpl implements QuestionAnswerMasterServ
 		
 		return questionAnswerMasterDTOs;		
 	}
+	
+	//getAllQuestionAnswerMasterByMasterIAndClientId
+	@Override
+	public QuestionAnswerMasterDTO getAllQuestionAnswerMasterByQuestionMasterIdAndClientId(long questionMasterId, long clientId) {
+		short notDeleted = 0;
+		QuestionAnswerMaster questionAnswerMaster= questionAnswerMasterRepository.findByQuestionIdAndClientId(questionMasterId, clientId);
+		QuestionAnswerMasterDTO questionAnswerMasterDTOs = null;
+		
+		if(questionAnswerMaster!=null)		
+			questionAnswerMasterDTOs =  modelMapper.map(questionAnswerMaster, QuestionAnswerMasterDTO.class);
+		
+		return questionAnswerMasterDTOs;		
+	}
 
 	private void mapQuestionAnswerMasterModelToDTO(List<QuestionAnswerMaster> questionAnswerMasterList, List<QuestionAnswerMasterDTO> questionAnswerMasterDTOs) {
 		QuestionAnswerMasterDTO questionAnswerMasterDTO = null;
@@ -133,6 +146,11 @@ public void editBulkQuestionAnswerMasterById(List<QuestionAnswerMasterBulkEditRe
 	
 	try {
 		for (QuestionAnswerMasterBulkEditRequest questionAnswerMasterEditRequest : questionAnswerMasterList) {
+			
+			String answr = questionAnswerMasterEditRequest.getAnswer();
+			if(answr == null) {
+				questionAnswerMasterEditRequest.setAnswer("");
+			}
 		
 			Optional<QuestionAnswerMaster> questionAnswerMasterEntity = questionAnswerMasterRepository.findById(questionAnswerMasterEditRequest.getId());
 			if(questionAnswerMasterEntity.isPresent()) {

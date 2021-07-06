@@ -12,11 +12,13 @@ public class UserInfoEditRequest {
 	
 	    private Long id;
 		private Long clientId;
+		private Long expTemplateId;
 		private String userFname;
 		private String userMname;
 		private String userLname;
 		private String email;
 		private String empId;
+		private String extId;
 		private Long orgNode;
 		private Long reportingMgr;
 		private Long accessTypeId;
@@ -25,5 +27,7 @@ public class UserInfoEditRequest {
 		private String modifiedBy;
 		private Date modifiedDate;
 		private Short isDelete;
+		private short isTsOpen;
+		private short isExpOpen;
 		//private String password;
 }

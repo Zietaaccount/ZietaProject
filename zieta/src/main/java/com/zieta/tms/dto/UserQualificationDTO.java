@@ -11,29 +11,18 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TSInfoDTO {
+public class UserQualificationDTO {
 
     private Long id;
+    private Long userId;
 	private Long clientId;
-	private Long tsId;
-	private Long projectId;
-	private Long activityId;
-	private Long taskActivityId;
-	private Long userId;
-	private Long taskId;
-	private Long statusId;
-	private boolean plannedActivity;
-	
-	
-	private String tsDate;
-	private String submitDate;
-	private float tsTotalSubmittedTime;
-	private float tsTotalApprovedTime;
-	
+	private Long qualificationDesc;
+	private String qualFileName;
+	private String qualFilePath;	
 	private String createdBy;
-
+	private Date createdDate;
 	private String modifiedBy;
-	
+	private Date modifiedDate;
 	private short isDelete;
 	
 

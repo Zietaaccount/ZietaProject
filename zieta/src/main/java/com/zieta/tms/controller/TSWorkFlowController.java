@@ -54,10 +54,35 @@ public class TSWorkFlowController {
 	}
 	
 	@RequestMapping(value = "getActiveWorkFlowRequestsByApprover", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<WFRDetailsForApprover> getActiveWorkFlowRequestsByApprover(@RequestParam(required = true) Long approverId) {
+	public List<WFRDetailsForApprover> getActiveWorkFlowRequestsByApprover(@RequestParam(required = true) Long approverId,
+			@RequestParam(required = false) Long employeeId,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate) {
 		List<WFRDetailsForApprover> workFlowRequestList = null;
 		try {
-			workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverId(approverId);
+			
+			if(startDate!=null && endDate==null) {
+				endDate = startDate;
+			}else if(endDate!=null && startDate ==null ){
+				startDate = endDate;
+			}
+		
+			if(employeeId==null && startDate==null && endDate==null) {
+				workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverId(approverId);				
+				
+			}else if(employeeId!=null && startDate==null) {
+				
+				workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverIdAndEmployeeId(approverId, employeeId);
+			
+			}else if(startDate!=null && employeeId ==null) {
+				workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverIdAndTsDate(approverId,startDate, endDate);
+				
+			}else if(employeeId!=null && startDate!=null) {
+				
+				workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverIdAndEmployeeIdAndTsDate(approverId, employeeId, startDate, endDate);
+				
+			}
+			
 		} catch (Exception e) {
 
 			log.error("Error Occured in TSWorkFlowController#getActiveWorkFlowRequestsByApprover", e);
@@ -65,6 +90,31 @@ public class TSWorkFlowController {
 		return workFlowRequestList;
 
 	}
+	
+	/*
+	 * GET THE SIZE OF WORKFOLLOW LIST
+	 */
+	@RequestMapping(value = "getSizeOfActiveWorkFlowRequestsByApprover", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public int getSizeOfActiveWorkFlowRequestsByApprover(@RequestParam(required = true) Long approverId) {
+		List<WFRDetailsForApprover> workFlowRequestList = null;
+		int workFollowSize=0;
+		try {
+			//workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverIdAndTsDate(approverId, employeeId, startDate, endDate);
+			workFlowRequestList = workFlowRequestService.findActiveWorkFlowRequestsByApproverId(approverId);
+			
+			if(workFlowRequestList!=null) {
+				workFollowSize = workFlowRequestList.size();
+			}
+				
+			
+		} catch (Exception e) {
+
+			log.error("Error Occured in TSWorkFlowController#getActiveWorkFlowRequestsByApprover", e);
+		}
+		return workFollowSize;
+
+	}
+	
 
 	@RequestMapping(value = "getWorkFlowRequestsByApprover", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<WFRDetailsForApprover> getWorkFlowRequestsByApprover(@RequestParam(required = true) Long approverId,

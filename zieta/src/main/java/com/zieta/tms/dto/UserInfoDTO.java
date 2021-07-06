@@ -15,11 +15,13 @@ public class UserInfoDTO {
 
     private Long id;
 	private Long clientId;
+	private Long expTemplateId;
 	private String userFname;
 	private String userMname;
 	private String userLname;
 	private String email;
 	private String empId;
+	private String extId;
 	private Long orgNode;
 	private Long reportingMgr;
 	private Long accessTypeId;
@@ -30,6 +32,8 @@ public class UserInfoDTO {
 	private String modifiedBy;
 	private Date modifiedDate;
 	private short isDelete;
+	private short isTsOpen;
+	private short isExpOpen;
 	private String password;
 	
 	//additional values

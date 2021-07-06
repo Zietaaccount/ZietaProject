@@ -29,7 +29,11 @@ public interface LeaveInfoService {
 	public List<LeaveTypeMasterDTO> getAllLeaveTypesByClient(Long clientId);
 
 	public List<LeaveInfoDTO> getAllLeavesByClientUser(Long clientId, Long userId);
-
+	
+	public List<LeaveInfoDTO> getAllLeavesByClientAndDateRange(Long clientId, String startDate, String endDate);
+	
+	public List<LeaveInfoDTO> getAllLeavesByClientUserAndDateRange(Long clientId, Long userId, String startDate, String endDate);
+	
 	public void deleteLeaveInfoById(Long id, String modifiedBy) throws Exception;
 
 	public List<LeaveInfoDTO> findActiveLeavesByClientIdAndApproverId(Long clientId, Long approverId);
@@ -37,6 +41,8 @@ public interface LeaveInfoService {
 	public void deleteLeaveTypeById(Long id, String modifiedBy) throws Exception;
 	
 	public List<LeaveInfoDTO> getLeaveHistoryByApprover(Long clientId, Long approverId, String startDate, String endDate);
+	
+	
 
 
 

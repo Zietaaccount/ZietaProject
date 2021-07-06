@@ -26,6 +26,7 @@ public class UserDetailsResponse implements Serializable {
 	private String lastName;
 	private String userEmailId;
 	private String empId;
+	private String extId;
 	private long orgNode;
 	private Long reportingMgr;
 	private Long accessTypeId;
@@ -34,6 +35,8 @@ public class UserDetailsResponse implements Serializable {
 	private String clientDescription;
 	private String orgNodeName;
 	private String reportingManagerName;
+	private short isTsOpen;
+	private short isExpOpen;
 	
 	private List<ScreensMaster> screensByClient;
 	private List<String> accessTypesByClient;

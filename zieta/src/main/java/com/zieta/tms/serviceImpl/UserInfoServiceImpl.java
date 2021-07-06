@@ -15,18 +15,23 @@ import org.springframework.stereotype.Service;
 
 import com.zieta.tms.common.MessagesConstants;
 import com.zieta.tms.dto.UserInfoDTO;
+import com.zieta.tms.dto.UserDetailsDTO;
 import com.zieta.tms.model.ClientInfo;
 import com.zieta.tms.model.ScreensMaster;
 import com.zieta.tms.model.UserInfo;
+import com.zieta.tms.model.UserDetails;
 import com.zieta.tms.repository.AccessTypeMasterRepository;
 import com.zieta.tms.repository.AccessTypeScreenMappingRepository;
 import com.zieta.tms.repository.ClientInfoRepository;
 import com.zieta.tms.repository.MessageMasterRepository;
 import com.zieta.tms.repository.OrgInfoRepository;
 import com.zieta.tms.repository.UserInfoRepository;
+import com.zieta.tms.repository.UserDetailsRepository;
 import com.zieta.tms.request.PasswordEditRequest;
 import com.zieta.tms.request.UserInfoEditRequest;
+import com.zieta.tms.request.UserDetailsEditRequest;
 import com.zieta.tms.response.LoginResponse;
+import com.zieta.tms.response.ResponseMessage;
 import com.zieta.tms.response.AddUserResponse;
 import com.zieta.tms.response.UserDetailsResponse;
 import com.zieta.tms.service.AccessTypeMasterService;
@@ -45,6 +50,9 @@ public class UserInfoServiceImpl implements UserInfoService {
 	
 	@Autowired
 	UserInfoRepository userInfoRepositoryRepository;
+	
+	@Autowired
+	UserDetailsRepository userDetailsRepository;
 	
 	@Autowired
 	AccessTypeScreenMappingRepository accessControlConfigRepository;
@@ -160,6 +168,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		userDetailsResponse.setLastName(userInfo.getUserLname());
 		userDetailsResponse.setUserEmailId(userInfo.getEmail());
 		userDetailsResponse.setEmpId(userInfo.getEmpId());
+		userDetailsResponse.setEmpId(userInfo.getExtId());
 		if(userInfo.getOrgNode() !=null) {
 			userDetailsResponse.setOrgNode(userInfo.getOrgNode());
 		}
@@ -233,16 +242,40 @@ public class UserInfoServiceImpl implements UserInfoService {
 		if(userinfoEntities !=null) {
 			//set email id already exist validation
 			addUserResponse.setInfoMessage("EmailId "+userinfoEntities.getEmail()+" already in use ");
-			log.info("EmailId is already in use ",userinfoEntities.getEmail());
+			addUserResponse.setStatus("501");
+			//log.info("EmailId is already in use ",userinfoEntities.getEmail());
 			return addUserResponse;
 			//throw new Exception("Emailid is already in use " +userinfoEntities.getEmail());
 		}else{
 			
 			 addUserResponse.setInfoMessage("User Information Saved successfully ");
+			 addUserResponse.setStatus("201");
 			 userInfoRepositoryRepository.save(userinfo);	
 			 return addUserResponse;
 		}
 	}
+	
+	//TO SAVE ADDUSERDETAILS 
+	@Override
+	public UserDetails addUserDetails(UserDetails userDetails) throws Exception {
+		
+		short notDeleted = 0;
+				
+		try {			
+			 userDetailsRepository.save(userDetails);				
+			
+		}catch(Exception e) {
+			
+		}
+			
+		return userDetails;
+		
+	}
+	
+	
+	
+	
+	
 	
 	private boolean emailExist(String email) {
 		//boolean isValid = fa
@@ -252,7 +285,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 		}
 		return false;
 	}
-
+//
 
 	public void editUsersById(@Valid UserInfoEditRequest userinfoeditRequest) throws Exception {
 		
@@ -269,6 +302,48 @@ public class UserInfoServiceImpl implements UserInfoService {
 		}
 		
 	}
+	
+/*
+ * UPDATE USER DETAILS BY USER ID
+ * 
+ */
+public ResponseMessage editUserDetailsByUserId(@Valid UserDetailsEditRequest userDetailsEditRequest) throws Exception {	
+	try {
+		
+		ResponseMessage resMsg = new ResponseMessage();
+		Optional<UserDetails> userDetailsEntity = userDetailsRepository.findByUserId(userDetailsEditRequest.getUserId());
+		if(userDetailsEntity.isPresent()) {
+			UserDetails userDetails = userDetailsEntity.get();
+			 modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
+			 modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+			 modelMapper.map(userDetailsEditRequest,userDetails );
+			 userDetailsRepository.save(userDetails);			
+			resMsg.setMessage("User Details Successfully Updated...");
+			resMsg.setStatus(200);
+			return resMsg;
+			
+		}else {
+			throw new Exception("User Details not found with the provided User ID : "+userDetailsEditRequest.getUserId());
+		}
+	}catch(Exception e) {
+		ResponseMessage resMsg = new ResponseMessage();
+		resMsg.setMessage("Failed to update User Details!!!");
+		resMsg.setStatus(403);
+		return resMsg;		
+	}		
+}
+
+@Override
+public UserDetailsDTO findUserDetailsByUserId(long userId) {
+	UserDetailsDTO userDetailsDTO = null;
+	UserDetails userDetails = userDetailsRepository.findUserDetailsByUserId(userId);
+	if(userDetails !=null) {
+		userDetailsDTO =  modelMapper.map(userDetails, UserDetailsDTO.class);
+	}
+	return userDetailsDTO;
+	
+}
+
 	
 	public void deleteUsersById(Long id, String modifiedBy) throws Exception {
 	Optional<UserInfo> userinfo = userInfoRepositoryRepository.findById(id);
